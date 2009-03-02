@@ -7,3 +7,4 @@ t/pod.t
 t/00-load.t
 t/boilerplate.t
 t/pod-coverage.t
+Changes
