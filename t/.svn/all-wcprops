@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 32
+/!svn/ver/2014/trunk/lib/aprof/t
+END
+pod.t
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/!svn/ver/2014/trunk/lib/aprof/t/pod.t
+END
+boilerplate.t
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/!svn/ver/2014/trunk/lib/aprof/t/boilerplate.t
+END
+pod-coverage.t
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/!svn/ver/2014/trunk/lib/aprof/t/pod-coverage.t
+END
+00-load.t
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/!svn/ver/2014/trunk/lib/aprof/t/00-load.t
+END
