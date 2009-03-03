@@ -1,3 +1,6 @@
 0.2
 	Changes added
 	svn-files removed from cpan
+
+0.3
+    a few incorrect tests were removed or fixed

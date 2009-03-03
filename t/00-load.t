@@ -1,9 +1,9 @@
-#!perl -T
+#!perl
 
 use Test::More tests => 2;
 
 BEGIN {
-	use_ok( 'AProf' );
+	use_ok( 'AProf', logfile    => 'NULL' );
 	use_ok( 'AProf::EasyParser' );
 }
 
