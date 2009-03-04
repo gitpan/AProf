@@ -3,7 +3,7 @@
 use utf8;
 package AProf;
 
-our $VERSION=0.4;
+our $VERSION=0.5;
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ AProf - is a profiler for periodically running processes
 
 =head1 VERSION 
 
-0.4
+0.5
 
 =head1 SYNOPSIS
 

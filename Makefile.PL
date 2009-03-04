@@ -11,4 +11,9 @@ WriteMakefile(
     VERSION_FROM        => './AProf.pm',
     ABSTRACT_FROM       => './AProf.pm',
     NO_META             => 0,
+    PREREQ_PM           => {
+    	'Time::HiRes'       =>  0,
+    	Fcntl               =>  0,
+    	Carp                =>  0,
+    },
 );
