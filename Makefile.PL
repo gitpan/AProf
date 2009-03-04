@@ -10,4 +10,5 @@ WriteMakefile(
     AUTHOR              => 'Dmitry E. Oboukhov <unera@debian.org>',
     VERSION_FROM        => './AProf.pm',
     ABSTRACT_FROM       => './AProf.pm',
+    NO_META             => 0,
 );

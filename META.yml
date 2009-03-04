@@ -1,0 +1,13 @@
+--- #YAML:1.0
+name:                AProf
+version:             0.4
+abstract:            is a profiler for periodically running processes
+license:             ~
+author:              
+    - Dmitry E. Oboukhov <unera@debian.org>
+generated_by:        ExtUtils::MakeMaker version 6.42
+distribution_type:   module
+requires:     
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
+    version: 1.3

@@ -12,7 +12,7 @@ package AProf::EasyParser;
 use base qw(Exporter);
 use Carp;
 
-our $VERSION=0.3;
+our $VERSION=0.4;
 our @EXPORT=qw(aprof_report aprof_report_array);
 
 

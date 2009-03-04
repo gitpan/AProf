@@ -3,4 +3,7 @@
 	svn-files removed from cpan
 
 0.3
-    a few incorrect tests were removed or fixed
+    	a few incorrect tests were removed or fixed
+
+0.4
+	The valid META.yml has been created

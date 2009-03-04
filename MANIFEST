@@ -3,8 +3,6 @@ Makefile.PL
 AProf.pm
 AProf/EasyParser.pm
 AProf/ManualRus.pod
-t/pod.t
 t/00-load.t
-t/boilerplate.t
-t/pod-coverage.t
 Changes
+META.yml                                 Module meta-data (added by MakeMaker)
