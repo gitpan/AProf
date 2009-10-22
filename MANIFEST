@@ -5,4 +5,3 @@ AProf/EasyParser.pm
 AProf/ManualRus.pod
 t/00-load.t
 Changes
-META.yml                                 Module meta-data (added by MakeMaker)

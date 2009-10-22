@@ -3,7 +3,7 @@
 use utf8;
 package AProf;
 
-our $VERSION=0.5;
+our $VERSION=0.6;
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ AProf - is a profiler for periodically running processes
 
 =head1 VERSION 
 
-0.5
+0.6
 
 =head1 SYNOPSIS
 
@@ -170,7 +170,7 @@ our @SKIP_MODULES =
 
 our @SKIP_FUNCTIONS =
 (
-	'DESTROY',
+    'DESTROY',
     'AUTOLOAD',
     'import',
 );
@@ -179,11 +179,11 @@ our $DEBUG=0;
 
 sub import
 {
-	my $ip=shift;
-	my $package=caller;
+    my $ip=shift;
+    my $package=caller;
 
-	our $script_started;
-	$script_started = Time::HiRes::time unless $script_started;
+    our $script_started;
+    $script_started = Time::HiRes::time unless $script_started;
 
     printf STDERR "Called import 'AProf' from package $package\n\t%s\n",
         join '=>', @_ if $DEBUG;
@@ -195,68 +195,79 @@ sub import
     $opts{recursive}=0
         if $opts{recursive} ne 1 and $opts{recursive} ne 'yes';
 
-	push @uses_array,
-	{
-		caller  => [ caller ],
-		import  => \%opts,
-		package => $package
-	};
+    push @uses_array,
+    {
+        caller  => [ caller ],
+        import  => \%opts,
+        package => $package
+    };
 }
 
 
 # caller wrapper
 sub _caller
 {
-	our $caller_proxy;
-	my $expr=1 + shift||0;
-	goto &$caller_proxy;
+    our $caller_proxy;
+    my $expr=1 + shift||0;
+    goto &$caller_proxy;
 }
 
 # function wrapper
 sub _profile($$@)
 {
-	my $name=shift;
-	my $code=shift;
-	our %_hooks;
-	our $caller_proxy;
+    my $name=shift;
+    my $code=shift;
+    our %_hooks;
+    our $caller_proxy;
 
-	my ($result, @result);
-	my $time_start = Time::HiRes::time;
+    my ($result, @result);
+    my $time_start = Time::HiRes::time;
 
-	my $wa=wantarray;
+    my $wa = wantarray;
 
     # if recursion is detected, statistic does not check
-    my $recursion_detected=$_hooks{$name}{proc_started};
-    $_hooks{$name}{proc_started}=1 unless $recursion_detected;
+    my $recursion_detected = $_hooks{$name}{proc_started};
+    $_hooks{$name}{proc_started} = 1 unless $recursion_detected;
 
-	eval
-	{
-#         local ($caller_proxy, *CORE::GLOBAL::caller)=
-#         (
-#             *CORE::GLOBAL::caller{CODE} || *CORE::caller{CODE},
-#             \&_caller
-#         ) unless defined $caller_proxy;
+    my $package = caller;
 
-		if ($wa) { @result =  &$code }
-	    elsif (defined $wa) { $result = &$code }
-	    else { &$code }
-	};
+    # change package (we don't want to redefine function 'caller'
+    if ($wa)
+    {
+        eval sprintf 'package %s; @result = &$code', $package;
+    }
+    elsif (defined $wa)
+    {
+        eval sprintf 'package %s; $result = &$code', $package;
+    }
+    else
+    {
+        eval sprintf 'package %s; &$code', $package;
+    }
 
-	my $time_end = Time::HiRes::time;
-	my $work_time=$time_end-$time_start;
+#  
+#         eval
+#         {
+#             if ($wa) { @result =  &$code }
+#             elsif (defined $wa) { $result = &$code }
+#             else { &$code }
+#         };
+
+    my $time_end = Time::HiRes::time;
+    my $work_time=$time_end-$time_start;
 
     unless($recursion_detected)
     {
         unless ($_hooks{$name}{count})
         {
-    	    $_hooks{$name}{max_time}=$_hooks{$name}{min_time}=$work_time;
+            $_hooks{$name}{max_time}=$_hooks{$name}{min_time}=$work_time;
         }
         else
         {
-    	    $_hooks{$name}{min_time}=$work_time
-    	        if $work_time<$_hooks{$name}{min_time};
-    	    $_hooks{$name}{max_time}=$work_time
-    	        if $work_time>$_hooks{$name}{max_time};
+            $_hooks{$name}{min_time}=$work_time
+                if $work_time<$_hooks{$name}{min_time};
+            $_hooks{$name}{max_time}=$work_time
+                if $work_time>$_hooks{$name}{max_time};
         }
 
         $_hooks{$name}{sum_time} += $work_time;
@@ -264,28 +275,28 @@ sub _profile($$@)
 
         if ($DEBUG)
         {
-    	    my $action=$@?'died':'called';
-    	    my $type=defined($wa)?($wa?'ARRAY ':'SCALAR '):'VOID ';
+            my $action=$@?'died':'called';
+            my $type=defined($wa)?($wa?'ARRAY ':'SCALAR '):'VOID ';
 
             if ($wa or defined $wa)
             {
-        	    printf STDERR "%s %s%s(%s) => %s\n",
-        	        $action,
-        	        $type,
-        	        $name,
-        	        join(',', @_),
-        	        ($type eq 'VOID ')?'VOID':
-        	            join(',', $wa?@result:
-        	                defined($result)?$result:'undef');
+                printf STDERR "%s %s%s(%s) => %s\n",
+                    $action,
+                    $type,
+                    $name,
+                    join(',', @_),
+                    ($type eq 'VOID ')?'VOID':
+                        join(',', $wa?@result:
+                            defined($result)?$result:'undef');
             }
         }
         $_hooks{$name}{proc_started}=0;
     }
 
     die $@ if $@;
-	return @result if $wa;
-	return $result if defined $wa;
-	return;
+    return @result if $wa;
+    return $result if defined $wa;
+    return;
 }
 
 sub _set_one_hook($$$$)
@@ -299,14 +310,14 @@ sub _set_one_hook($$$$)
     return unless $s =~ /^[\w_][\w_\d]*$/;
     if (exists $_hooks{$name})
     {
-    	push @{$_hooks{$name}{logfile}}, $log if $log;
-    	return;
+        push @{$_hooks{$name}{logfile}}, $log if $log;
+        return;
     }
 
     $_hooks{$name}=
     {
         package     => $p,
-    	fname       => $name,
+        fname       => $name,
         code        => $c,
         count       => 0,
         max_time    => 0,
@@ -325,9 +336,9 @@ sub _set_one_hook($$$$)
     unless ($is_constant)
     {
         *{$name}= sub {
-        	unshift @_, $c;
-        	unshift @_, $name;
-        	goto &_profile;
+            unshift @_, $c;
+            unshift @_, $name;
+            goto &_profile;
         };
         print STDERR "Redefined function '$name' to AProf profiler\n"
             if $DEBUG;
@@ -336,12 +347,12 @@ sub _set_one_hook($$$$)
 
 sub _set_hooks()
 {
-	for (my $i=0; $i<@uses_array; $i++)
-	{
-		my $use = $uses_array[$i];
+    for (my $i=0; $i<@uses_array; $i++)
+    {
+        my $use = $uses_array[$i];
         my $package=$use->{package};
         next if $package eq __PACKAGE__;
-		print STDERR "Processing module $package\n" if $DEBUG;
+        print STDERR "Processing module $package\n" if $DEBUG;
         $package .= '::' unless $package =~ /::$/;
         no strict 'refs';
         while(my ($sym, $glob)=each %{$package})
@@ -360,7 +371,7 @@ sub _set_hooks()
                 my $tp=__PACKAGE__; next if $sym=~/^$tp\::$/;
 
                 # package_name
-            	my $p=($package eq 'main::')?$sym:"$package$sym";
+                my $p=($package eq 'main::')?$sym:"$package$sym";
                 $p =~ s/::$//; next unless length $p;
 
                 next if grep { $p eq $_ } @SKIP_MODULES;
@@ -368,15 +379,15 @@ sub _set_hooks()
                     $_->{package} eq $p and
                     $_->{import}{recursive} eq $use->{import}{recursive}
                 } @uses_array;
-            	push @uses_array,
-            	{
-		            caller  => $use->{caller},
-		            import  => $use->{import},
-		            package => $p,
-            	};
+                push @uses_array,
+                {
+                    caller  => $use->{caller},
+                    import  => $use->{import},
+                    package => $p,
+                };
 
-            	print STDERR "Package $p added to profiler list\n" if $DEBUG;
-            	next;
+                print STDERR "Package $p added to profiler list\n" if $DEBUG;
+                next;
             }
             next if grep { $sym eq $_ } @SKIP_FUNCTIONS;
             next if ref $glob or !$glob;
@@ -385,18 +396,18 @@ sub _set_hooks()
             next unless 'CODE' eq ref $code;
             _set_one_hook $package, $sym, $code, $use->{import}{logfile};
         }
-	}
+    }
 }
 
 sub _get_log_header()
 {
-	return sprintf "%-30s  %6s  %12s  %12s  %12s\n%s\n",
-	    "Function", "calls", "average", "max", "min", "-"x 80;
+    return sprintf "%-30s  %6s  %12s  %12s  %12s\n%s\n",
+        "Function", "calls", "average", "max", "min", "-"x 80;
 }
 
 sub _get_profiled_time_log_header()
 {
-	our $script_started;
+    our $script_started;
     my @lt=localtime; $lt[4]++; $lt[5]+=1900;
     my $work_time = sprintf '%1.10f', Time::HiRes::time -  $script_started;
     my $curr_time = sprintf '%04d-%02d-%02d %02d:%02d:%02d', @lt[reverse 0 .. 5];
@@ -408,84 +419,84 @@ sub _get_profiled_time_log_header()
 
 sub _get_one_log_line($)
 {
-	my $log=shift;
+    my $log=shift;
     my $average = 0;
     $average = $log->{sum_time}/$log->{count} if $log->{count};
     return sprintf "%-30s  %6d" . "  %.12s"x 3 . "\n",
-    	$log->{fname},
-    	$log->{count},
-    	map { sprintf "%1.10f", $_ }
-    	    $average,
-    	    $log->{max_time},
+        $log->{fname},
+        $log->{count},
+        map { sprintf "%1.10f", $_ }
+            $average,
+            $log->{max_time},
             $log->{min_time};
 }
 
 sub full_log()
 {
-	our %_hooks;
-	my $report = _get_log_header;
-	$report   .= _get_profiled_time_log_header;
-	for my $log(sort { $b->{sum_time} <=> $a->{sum_time} } values %_hooks)
-	{
+    our %_hooks;
+    my $report = _get_log_header;
+    $report   .= _get_profiled_time_log_header;
+    for my $log(sort { $b->{sum_time} <=> $a->{sum_time} } values %_hooks)
+    {
         $report .= _get_one_log_line $log;
-	}
-	return $report;
+    }
+    return $report;
 }
 
 sub _savelog()
 {
-	our $already_saved;
-	return if $already_saved;
+    our $already_saved;
+    return if $already_saved;
     our %_hooks;
     my %lp;
-	$already_saved=1;
+    $already_saved=1;
 
     LOG: for my $log(sort { $b->{sum_time} <=> $a->{sum_time} } values %_hooks)
     {
-    	for my $logname (@{$log->{logfile}})
-    	{
-    		next unless $log->{count};
-    	    my $fo;
-    	    unless (exists $lp{$logname})
-    	    {
-    		    my $file_logging;
+        for my $logname (@{$log->{logfile}})
+        {
+            next unless $log->{count};
+            my $fo;
+            unless (exists $lp{$logname})
+            {
+                my $file_logging;
                 if ($logname eq 'STDERR')
                 {
-            	    $fo=\*STDERR;
+                    $fo=\*STDERR;
                 }
                 elsif($logname eq 'STDOUT')
                 {
-            	    $fo=\*STDOUT;
+                    $fo=\*STDOUT;
                 }
                 elsif($logname eq 'NULL')
                 {
-            	    next LOG;
+                    next LOG;
                 }
                 else
                 {
                     $file_logging=1 if -f $logname;
-            	    unless (open $fo, '>>', $logname)
-            	    {
-            	        carp "Can not append file '$logname': $!\n";
-            	    }
+                    unless (open $fo, '>>', $logname)
+                    {
+                        carp "Can not append file '$logname': $!\n";
+                    }
                 }
                 $lp{$logname}={fh => $fo, is_file=>$file_logging};
 
                 printf $fo _get_log_header unless $file_logging;
                 printf $fo _get_profiled_time_log_header;
-    	    }
-    	    else
-    	    {
-    	        $fo=$lp{$logname}{fh};
-    	    }
-    	    if ($lp{$logname}{is_file})
-    	    {
-    	    	flock $lp{$logname}{fh}, LOCK_EX;
-    	    	seek $lp{$logname}{fh}, 0, SEEK_END;
-    	    }
-    	    printf $fo _get_one_log_line $log;
+            }
+            else
+            {
+                $fo=$lp{$logname}{fh};
+            }
+            if ($lp{$logname}{is_file})
+            {
+                flock $lp{$logname}{fh}, LOCK_EX;
+                seek $lp{$logname}{fh}, 0, SEEK_END;
+            }
+            printf $fo _get_one_log_line $log;
             flock $lp{$logname}{fh}, LOCK_UN if $lp{$logname}{is_file};
-    	}
+        }
     }
 }
 
